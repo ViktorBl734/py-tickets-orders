@@ -111,15 +111,14 @@ class OrderViewSet(viewsets.ModelViewSet):
             return OrderCreateSerializer
 
     def get_queryset(self):
-
         if self.action == "list":
-
-            return (self.queryset.filter(user=self.request.user)
-            .prefetch_related(
-            "tickets__movie_session__movie",
-            "tickets__movie_session__cinema_hall"
-        )
-        )
+            return (
+                self.queryset.filter(user=self.request.user)
+                .prefetch_related(
+                    "tickets__movie_session__movie",
+                    "tickets__movie_session__cinema_hall"
+                )
+            )
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
