@@ -1,5 +1,4 @@
 from django.db.models import ExpressionWrapper, Count, F
-from django.template.defaultfilters import title
 from rest_framework import viewsets
 from rest_framework.fields import IntegerField
 
@@ -79,11 +78,15 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
         return MovieSessionSerializer
 
     def get_queryset(self):
-        queryset = super().get_queryset().select_related("movie", "cinema_hall").annotate(
-            tickets_sold=Count("tickets"),
-            tickets_available=ExpressionWrapper(
-                F("cinema_hall__capacity") - Count("tickets"),
-                output_field=IntegerField()
+        queryset = (
+            super().get_queryset()
+            .select_related("movie", "cinema_hall")
+            .annotate(
+                tickets_sold=Count("tickets"),
+                tickets_available=ExpressionWrapper(
+                    F("cinema_hall__capacity") - Count("tickets"),
+                    output_field=IntegerField()
+                )
             )
         )
 
@@ -111,9 +114,11 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         if self.action == "list":
 
-            return self.queryset.filter(user=self.request.user).prefetch_related(
+            return (self.queryset.filter(user=self.request.user)
+            .prefetch_related(
             "tickets__movie_session__movie",
             "tickets__movie_session__cinema_hall"
+        )
         )
 
     def perform_create(self, serializer):
