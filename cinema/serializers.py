@@ -1,8 +1,15 @@
 from django.db import transaction
-from rest_framework import serializers, request
+from rest_framework import serializers
 
-from cinema.models import (Genre, Actor, CinemaHall,
-                           Movie, MovieSession, Order, Ticket)
+from cinema.models import (
+    Genre,
+    Actor,
+    CinemaHall,
+    Movie,
+    MovieSession,
+    Order,
+    Ticket,
+)
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -18,15 +25,33 @@ class ActorSerializer(serializers.ModelSerializer):
 
 
 class CinemaHallSerializer(serializers.ModelSerializer):
+    capacity = serializers.SerializerMethodField()
+
     class Meta:
         model = CinemaHall
-        fields = ("id", "name", "rows", "seats_in_row", "capacity")
+        fields = (
+            "id",
+            "name",
+            "rows",
+            "seats_in_row",
+            "capacity",
+        )
+
+    def get_capacity(self, obj):
+        return obj.rows * obj.seats_in_row
 
 
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
-        fields = ("id", "title", "description", "duration", "genres", "actors")
+        fields = (
+            "id",
+            "title",
+            "description",
+            "duration",
+            "genres",
+            "actors",
+        )
 
 
 class MovieListSerializer(MovieSerializer):
@@ -44,7 +69,14 @@ class MovieDetailSerializer(MovieSerializer):
 
     class Meta:
         model = Movie
-        fields = ("id", "title", "description", "duration", "genres", "actors")
+        fields = (
+            "id",
+            "title",
+            "description",
+            "duration",
+            "genres",
+            "actors",
+        )
 
 
 class MovieSessionSerializer(serializers.ModelSerializer):
@@ -54,7 +86,9 @@ class MovieSessionSerializer(serializers.ModelSerializer):
 
 
 class MovieSessionListSerializer(MovieSessionSerializer):
-    movie_title = serializers.CharField(source="movie.title", read_only=True)
+    movie_title = serializers.CharField(
+        source="movie.title", read_only=True
+    )
     cinema_hall_name = serializers.CharField(
         source="cinema_hall.name", read_only=True
     )
@@ -71,7 +105,7 @@ class MovieSessionListSerializer(MovieSessionSerializer):
             "movie_title",
             "cinema_hall_name",
             "cinema_hall_capacity",
-            "tickets_available"
+            "tickets_available",
         )
 
 
@@ -82,7 +116,13 @@ class MovieSessionDetailSerializer(MovieSessionSerializer):
 
     class Meta:
         model = MovieSession
-        fields = ("id", "show_time", "movie", "cinema_hall", "taken_places")
+        fields = (
+            "id",
+            "show_time",
+            "movie",
+            "cinema_hall",
+            "taken_places",
+        )
 
     def get_taken_places(self, obj):
         tickets = Ticket.objects.filter(movie_session=obj)
@@ -115,7 +155,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     tickets = TicketCreateSerializer(
         many=True,
         read_only=False,
-        allow_empty=False
+        allow_empty=False,
     )
 
     class Meta:
