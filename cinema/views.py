@@ -83,13 +83,14 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
             .select_related("movie", "cinema_hall")
             .annotate(
                 tickets_sold=Count("tickets"),
+            )
+            .annotate(
                 tickets_available=ExpressionWrapper(
-                    F("cinema_hall__capacity") - Count("tickets"),
+                    F("cinema_hall__capacity") - F("tickets_sold"),
                     output_field=IntegerField()
                 )
             )
         )
-
         if self.action == "list":
             date = self.request.query_params.get("date")
             movie = self.request.query_params.get("movie")
