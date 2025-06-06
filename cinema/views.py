@@ -84,7 +84,8 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
             .annotate(
                 tickets_sold=Count("tickets"),
                 tickets_available=ExpressionWrapper(
-                    F("cinema_hall__rows") * F("cinema_hall__seats_in_row") - F("tickets_sold"),
+                    F("cinema_hall__rows") * F("cinema_hall__seats_in_row")
+                    - F("tickets_sold"),
                     output_field=IntegerField()
                 )
             )
